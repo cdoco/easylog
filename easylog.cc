@@ -129,12 +129,12 @@ PHP_METHOD(easylog, trace) {
 }
 
 static const zend_function_entry easylog_methods[] = {
-	PHP_ME(easylog, __construct, arginfo__construct, ZEND_ACC_PUBLIC)
-	PHP_ME(easylog, info, arginfo_info, ZEND_ACC_PUBLIC)
-	PHP_ME(easylog, warning, arginfo_info, ZEND_ACC_PUBLIC)
-	PHP_ME(easylog, error, arginfo_info, ZEND_ACC_PUBLIC)
-	PHP_ME(easylog, debug, arginfo_info, ZEND_ACC_PUBLIC)
-	PHP_ME(easylog, trace, arginfo_info, ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, __construct, arginfo__construct, ZEND_ACC_CTOR | ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, info, arginfo_info, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, warning, arginfo_info, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, error, arginfo_info, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, debug, arginfo_info, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, trace, arginfo_info, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_FE_END	/* Must be the last line in easylog_functions[] */
 };
 
