@@ -47,6 +47,28 @@ easylog.config_file = "/data/easylog.conf"
     FILENAME                =   "/data/logs/php/info_%datetime{%Y%M%d}.log"
 ```
 
+#### Date/Time Format Specifiers
+You can customize date/time format using following specifiers
+
+|    Specifier    |                 Replaced By                                                                                      |
+|-----------------|------------------------------------------------------------------------------------------------------------------|
+| `%d`            | Day of month (zero-padded)                                                                                       |
+| `%a`            | Day of the week - short (Mon, Tue, Wed, Thu, Fri, Sat, Sun)                                                      |
+| `%A`            | Day of the week - long (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday)                          |
+| `%M`            | Month (zero-padded)                                                                                              |
+| `%b`            | Month - short (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)                                       |
+| `%B`            | Month - Long (January, February, March, April, May, June, July, August, September, October, November, December)  |
+| `%y`            | Year - Two digit (13, 14 etc)                                                                                    |
+| `%Y`            | Year - Four digit (2013, 2014 etc)                                                                               |
+| `%h`            | Hour (12-hour format)                                                                                            |
+| `%H`            | Hour (24-hour format)                                                                                            |
+| `%m`            | Minute (zero-padded)                                                                                             |
+| `%s`            | Second (zero-padded)                                                                                             |
+| `%g`            | Subsecond part (precision is configured by ConfigurationType::SubsecondPrecision)                               |
+| `%F`            | AM/PM designation                                                                                                |
+| `%`             | Escape character                                                                                                 |
+
+
 ### easylog.php
 
 ```php
