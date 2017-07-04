@@ -54,78 +54,61 @@ PHP_GINIT_FUNCTION(easylog){
 	easylog_globals->config_file = "";
 }
 
+//write log
+static void write_log(el::Level level, INTERNAL_FUNCTION_PARAMETERS) {
+
+	char *slog = NULL;
+	size_t slog_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &slog, &slog_len) == FAILURE) {
+		return;
+	}
+
+	switch(level) {
+		case el::Level::Info:
+			LOG(INFO) << slog;
+			break;
+		case el::Level::Debug:
+			LOG(DEBUG) << slog;
+			break;
+		case el::Level::Warning:
+			LOG(WARNING) << slog;
+			break;
+		case el::Level::Error:
+			LOG(ERROR) << slog;
+			break;
+		case el::Level::Trace:
+			LOG(TRACE) << slog;
+			break;
+		default:
+			break;
+	}
+
+	RETURN_TRUE;
+}
+
 PHP_METHOD(easylog, __construct) {
 	RETURN_TRUE;
 }
 
 PHP_METHOD(easylog, info) {
-
-	char *slog = NULL;
-	size_t slog_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &slog, &slog_len) == FAILURE) {
-		return;
-	}
-
-	LOG(INFO) << slog;
-
-	RETURN_TRUE;
+	write_log(el::Level::Info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, warning) {
-
-	char *slog = NULL;
-	size_t slog_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &slog, &slog_len) == FAILURE) {
-		return;
-	}
-
-	LOG(WARNING) << slog;
-
-	RETURN_TRUE;
+	write_log(el::Level::Warning, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, error) {
-
-	char *slog = NULL;
-	size_t slog_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &slog, &slog_len) == FAILURE) {
-		return;
-	}
-
-	LOG(ERROR) << slog;
-
-	RETURN_TRUE;
+	write_log(el::Level::Error, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, debug) {
-
-	char *slog = NULL;
-	size_t slog_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &slog, &slog_len) == FAILURE) {
-		return;
-	}
-
-	LOG(DEBUG) << slog;
-
-	RETURN_TRUE;
+	write_log(el::Level::Debug, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, trace) {
-
-	char *slog = NULL;
-	size_t slog_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &slog, &slog_len) == FAILURE) {
-		return;
-	}
-
-	LOG(TRACE) << slog;
-
-	RETURN_TRUE;
+	write_log(el::Level::Trace, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 static const zend_function_entry easylog_methods[] = {
