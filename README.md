@@ -13,6 +13,7 @@ phpize && ./configure && make && make install
 
 ```ini
 extension=easylog.so
+
 [easylog]
 easylog.config_file = "/data/easylog.conf"
 ```
@@ -45,6 +46,8 @@ easylog.config_file = "/data/easylog.conf"
 * INFO:
     FILENAME                =   "/data/logs/php/info_%datetime{%Y%M%d}.log"
 ```
+
+### easylog.php
 
 ```php
 $easylog = new Easylog();
