@@ -50,11 +50,12 @@ easylog.config_file = "/data/easylog.conf"
 ### easylog.php
 
 ```php
-$easylog = new Easylog();
+<?php
+    $easylog = new Easylog();
 
-$easylog->info("info");
-$easylog->warning("warning");
-$easylog->error("error");
-$easylog->debug("debug");
-$easylog->trace("trace");
+    $easylog->info("info");
+    $easylog->warning("warning");
+    $easylog->error("error");
+    $easylog->debug("debug");
+    $easylog->trace("trace");
 ```
