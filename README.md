@@ -17,34 +17,74 @@ extension=easylog.so
 [easylog]
 easylog.config_file = "/data/easylog.conf"
 ```
-### easylog.conf
+
+### Quick start
+
+```php
+<?php
+	//设置 logger ID
+	//这个 id 必须在配置文件中存在
+	$easylog = new Easylog("easylog");
+
+	//设置日志级别
+	$easylog->setLevel(Easylog::ERROR);
+
+	$easylog->info("info");
+	$easylog->warning("warning");
+	$easylog->error("error");
+	$easylog->debug("debug");
+```
+
+### Configuring file
 
 ```conf
-* GLOBAL:
-    ENABLED                 =   true
-    TO_FILE                 =   true
-    TO_STANDARD_OUTPUT      =   true
-    FORMAT                  =   "[%level | %datetime] | %msg"
-    FILENAME                =   "/data/logs/php/log_%datetime{%Y%M%d}.log"
-    MILLISECONDS_WIDTH      =   3
-    PERFORMANCE_TRACKING    =   false
-    MAX_LOG_FILE_SIZE       =   1048576
-    LOG_FLUSH_THRESHOLD     =   0
+-- default // logger id
+    * GLOBAL:
+        ENABLED                 =   true
+        TO_FILE                 =   true
+        TO_STANDARD_OUTPUT      =   true
+        FORMAT                  =   "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg"
+        FILENAME                =   "/data/logs/php/log_%datetime{%Y%M%d}.log"
+        MILLISECONDS_WIDTH      =   3
+        PERFORMANCE_TRACKING    =   false
+        MAX_LOG_FILE_SIZE       =   1048576
+        LOG_FLUSH_THRESHOLD     =   0
 
-* TRACE:
-    FILENAME                =   "/data/logs/php/trace_%datetime{%Y%M%d}.log"
+    * TRACE:
+        FILENAME                =   "/data/logs/php/trace_%datetime{%Y%M%d}.log"
 
-* DEBUG:
-    FILENAME                =   "/data/logs/php/debug_%datetime{%Y%M%d}.log"
+    * DEBUG:
+        FILENAME                =   "/data/logs/php/debug_%datetime{%Y%M%d}.log"
 
-* ERROR:
-    FILENAME                =   "/data/logs/php/error_%datetime{%Y%M%d}.log"
+    * FATAL:
+        ENABLED                 =   false 
 
-* WARNING:
-    FILENAME                =   "/data/logs/php/warning_%datetime{%Y%M%d}.log"
+    * ERROR:
+        FILENAME                =   "/data/logs/php/error_%datetime{%Y%M%d}.log"
 
-* INFO:
-    FILENAME                =   "/data/logs/php/info_%datetime{%Y%M%d}.log"
+    * WARNING:
+        FILENAME                =   "/data/logs/php/warning_%datetime{%Y%M%d}.log"
+
+    * INFO:
+        FILENAME                =   "/data/logs/php/info_%datetime{%Y%M%d}.log"
+
+    * VERBOSE:  
+        ENABLED                 =   false
+
+-- easylog // logger id
+    * GLOBAL:
+        ENABLED                 =   true
+        TO_FILE                 =   true
+        TO_STANDARD_OUTPUT      =   true
+        FORMAT                  =   "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg"
+        FILENAME                =   "/data/logs/php/zybook3/log_%datetime{%Y%M%d}.log"
+        MILLISECONDS_WIDTH      =   3
+        PERFORMANCE_TRACKING    =   false
+        MAX_LOG_FILE_SIZE       =   1048576
+        LOG_FLUSH_THRESHOLD     =   0
+
+    * INFO:
+        FILENAME                =   "/data/logs/php/zybook3/info_%datetime{%Y%M%d}.log"
 ```
 
 #### Configuration Options
@@ -81,20 +121,3 @@ You can customize date/time format using following specifiers
 | `%g`            | Subsecond part (precision is configured by ConfigurationType::SubsecondPrecision)                               |
 | `%F`            | AM/PM designation                                                                                                |
 | `%`             | Escape character                                                                                                 |
-
-
-### easylog.php
-
-```php
-<?php
-    //print info
-    Easylog::info("info");
-    //print warning
-    Easylog::warning("warning");
-    //print error
-    Easylog::error("error");
-    //print debug
-    Easylog::debug("debug");
-    //print trace
-    Easylog::trace("trace");
-```
