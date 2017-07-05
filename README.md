@@ -77,14 +77,14 @@ easylog.config_file = "/data/easylog.conf"
         TO_FILE                 =   true
         TO_STANDARD_OUTPUT      =   true
         FORMAT                  =   "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg"
-        FILENAME                =   "/data/logs/php/zybook3/log_%datetime{%Y%M%d}.log"
+        FILENAME                =   "/data/logs/php/easylog/log_%datetime{%Y%M%d}.log"
         MILLISECONDS_WIDTH      =   3
         PERFORMANCE_TRACKING    =   false
         MAX_LOG_FILE_SIZE       =   1048576
         LOG_FLUSH_THRESHOLD     =   0
 
     * INFO:
-        FILENAME                =   "/data/logs/php/zybook3/info_%datetime{%Y%M%d}.log"
+        FILENAME                =   "/data/logs/php/easylog/info_%datetime{%Y%M%d}.log"
 ```
 
 #### Configuration Options
