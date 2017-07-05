@@ -22,7 +22,7 @@ easylog.config_file = "/data/easylog.conf"
 
 ```php
 <?php
-    //设置 logger ID
+    //设置 logger ID 默认 default
     //这个 id 必须在配置文件中存在
     $easylog = new Easylog("easylog");
 
