@@ -36,12 +36,12 @@ easylog.config_file = "/data/easylog.conf"
     $easylog->trace("trace");
     $easylog->fatal("fatal");
 
-    $easylog2 = new Easylog("zy");
+    $zy = new Easylog("zy");
 
-    $easylog2->setFormat(Easylog::GLOBAL, "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg");
+    $zy->setFormat(Easylog::GLOBAL, "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg");
 
-    $easylog2->info("info");
-    $easylog2->warning("warning");
+    $zy->info("info");
+    $zy->warning("warning");
 ```
 
 ### Configuring file
