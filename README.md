@@ -41,6 +41,13 @@ easylog.log_level = "info"
     $zy = new Easylog("zy");
 
     $zy->setFormat(Easylog::GLOBAL, "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg");
+    $zy->setToFile(Easylog::GLOBAL, "true");
+    $zy->setFileName(Easylog::GLOBAL, "/data/logs/php/zy.log");
+    $zy->setMaxLogFileSize(Easylog::GLOBAL, "2097152");
+    $zy->setToStandardOutput(Easylog::GLOBAL, "true");
+    $zy->setPerformanceTracking(Easylog::GLOBAL, "false");
+    $zy->setLogFlushThreshold(Easylog::GLOBAL, "1");
+    $zy->setMillisecondsWidth(Easylog::GLOBAL, "3");
 
     $zy->info("info");
     $zy->warning("warning");

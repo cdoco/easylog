@@ -220,11 +220,35 @@ static void set_config(ConfigurationType type, INTERNAL_FUNCTION_PARAMETERS) {
 }
 
 PHP_METHOD(easylog, setFileName) {
-	set_config(ConfigurationType::Enabled, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	set_config(ConfigurationType::Filename, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, setFormat) {
 	set_config(ConfigurationType::Format, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(easylog, setToFile) {
+	set_config(ConfigurationType::ToFile, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(easylog, setMaxLogFileSize) {
+	set_config(ConfigurationType::MaxLogFileSize, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(easylog, setToStandardOutput) {
+	set_config(ConfigurationType::ToStandardOutput, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(easylog, setPerformanceTracking) {
+	set_config(ConfigurationType::PerformanceTracking, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(easylog, setLogFlushThreshold) {
+	set_config(ConfigurationType::LogFlushThreshold, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(easylog, setMillisecondsWidth) {
+	set_config(ConfigurationType::MillisecondsWidth, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, info) {
@@ -267,6 +291,12 @@ static const zend_function_entry easylog_methods[] = {
 	PHP_ME(easylog, setLevel, arginfo_level, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME(easylog, setFormat, arginfo_config, ZEND_ACC_PUBLIC)
 	PHP_ME(easylog, setFileName, arginfo_config, ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, setToFile, arginfo_config, ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, setMaxLogFileSize, arginfo_config, ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, setToStandardOutput, arginfo_config, ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, setPerformanceTracking, arginfo_config, ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, setLogFlushThreshold, arginfo_config, ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, setMillisecondsWidth, arginfo_config, ZEND_ACC_PUBLIC)
 	PHP_FE_END	/* Must be the last line in easylog_functions[] */
 };
 

@@ -12,11 +12,18 @@
 	$easylog->error("error");
 	$easylog->debug("debug");
 
-	$easylog2 = new Easylog("zy");
+	$zy = new Easylog("zy");
 
-	$easylog2->setFormat(Easylog::GLOBAL, "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg");
+	$zy->setFormat(Easylog::GLOBAL, "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg");
+	$zy->setToFile(Easylog::GLOBAL, "true");
+	$zy->setFileName(Easylog::GLOBAL, "/data/logs/php/zy.log");
+	$zy->setMaxLogFileSize(Easylog::GLOBAL, "2097152");
+	$zy->setToStandardOutput(Easylog::GLOBAL, "true");
+	$zy->setPerformanceTracking(Easylog::GLOBAL, "false");
+	$zy->setLogFlushThreshold(Easylog::GLOBAL, "1");
+	$zy->setMillisecondsWidth(Easylog::GLOBAL, "3");
 
-	$easylog2->info("info");
-	$easylog2->warning("warning");
-	$easylog2->error("error");
-	$easylog2->debug("debug");
+	$zy->info("info");
+	$zy->warning("warning");
+	$zy->error("error");
+	$zy->debug("debug");
