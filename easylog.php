@@ -12,11 +12,11 @@
 	$easylog->error("error");
 	$easylog->debug("debug");
 
-	$easylog = new Easylog("zy");
+	$easylog2 = new Easylog("zy");
 
-	$easylog->setFormat(Easylog::GLOBAL, "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg");
+	$easylog2->setFormat(Easylog::GLOBAL, "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg");
 
-	$easylog->info("info");
-	$easylog->warning("warning");
-	$easylog->error("error");
-	$easylog->debug("debug");
+	$easylog2->info("info");
+	$easylog2->warning("warning");
+	$easylog2->error("error");
+	$easylog2->debug("debug");
