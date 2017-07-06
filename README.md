@@ -40,13 +40,21 @@ easylog.log_level = "info"
 
     $zy = new Easylog("zy");
 
+    //Determines format of logging corresponding level and logger.
     $zy->setFormat(Easylog::GLOBAL, "[%datetime{%Y-%M-%d %H:%m:%s}] %logger.%level | %msg");
+    //Whether or not to write corresponding log to log file
     $zy->setToFile(Easylog::GLOBAL, "true");
+    //Determines log file (full path) to write logs to for correponding level and logger
     $zy->setFileName(Easylog::GLOBAL, "/data/logs/php/zy.log");
+    //If file size of corresponding log file (for corresponding level) is >= specified size, log file will be truncated and re-initiated.
     $zy->setMaxLogFileSize(Easylog::GLOBAL, "2097152");
+    //Whether or not to write corresponding level and logger log to standard output
     $zy->setToStandardOutput(Easylog::GLOBAL, "true");
+    //This does not depend on logger or level. Performance tracking always uses 'performance' logger
     $zy->setPerformanceTracking(Easylog::GLOBAL, "false");
+    //Specifies number of log entries to hold until we flush pending log data
     $zy->setLogFlushThreshold(Easylog::GLOBAL, "1");
+    //Alias of SubsecondPrecision (for backward compatibility)
     $zy->setMillisecondsWidth(Easylog::GLOBAL, "3");
 
     $zy->info("info");
