@@ -33,8 +33,8 @@ easylog.config_file = "/data/easylog.conf"
     $easylog->warning("warning");
     $easylog->error("error");
     $easylog->debug("debug");
-    $easylog->trace("debug");
-    $easylog->fatal("debug");
+    $easylog->trace("trace");
+    $easylog->fatal("fatal");
 
     $easylog2 = new Easylog("zy");
 
