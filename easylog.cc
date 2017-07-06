@@ -31,6 +31,8 @@ extern "C" {
 
 #include "easyloggingpp/easylogging++.h"
 
+using namespace el;
+
 INITIALIZE_EASYLOGGINGPP
 
 static int le_easylog;
@@ -47,19 +49,27 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_info, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_level, 0, 0, 1)
-	ZEND_ARG_INFO(0, slog)
+	ZEND_ARG_INFO(0, level)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_config, 0, 0, 2)
+	ZEND_ARG_INFO(0, level)
+	ZEND_ARG_INFO(0, format)
+ZEND_END_ARG_INFO()
+
 
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("easylog.config_file", "", PHP_INI_SYSTEM, OnUpdateString, config_file, zend_easylog_globals, easylog_globals)
+	STD_PHP_INI_ENTRY("easylog.log_level", "global", PHP_INI_SYSTEM, OnUpdateString, log_level, zend_easylog_globals, easylog_globals)
 PHP_INI_END()
 
 PHP_GINIT_FUNCTION(easylog){
 	easylog_globals->config_file = "";
+	easylog_globals->log_level = "global";
 }
 
 //write log
-static void write_log(el::Level level, INTERNAL_FUNCTION_PARAMETERS) {
+static void write_log(Level level, INTERNAL_FUNCTION_PARAMETERS) {
 
 	char *slog = NULL;
 	size_t slog_len;
@@ -102,42 +112,54 @@ static void write_log(el::Level level, INTERNAL_FUNCTION_PARAMETERS) {
 }
 
 //转换成 easylogging++ 的级别
-static el::Level level_conversion(long level) {
-	el::Level elevel;
-	switch(level) {
-		case EASYLOG_GLOBAL_LEVEL:
-			elevel = el::Level::Global;
-			break;
-		case EASYLOG_TRACE_LEVEL:
-			elevel = el::Level::Trace;
-			break;
-		case EASYLOG_DEBUG_LEVEL:
-			elevel = el::Level::Debug;
-			break;
-		case EASYLOG_FATAL_LEVEL:
-			elevel = el::Level::Fatal;
-			break;
-		case EASYLOG_ERROR_LEVEL:
-			elevel = el::Level::Error;
-			break;
-		case EASYLOG_WARNING_LEVEL:
-			elevel = el::Level::Warning;
-			break;
-		case EASYLOG_VERBOSE_LEVEL:
-			elevel = el::Level::Verbose;
-			break;
-		case EASYLOG_INFO_LEVEL:
-			elevel = el::Level::Info;
-			break;
-		case EASYLOG_UNKNOWN_LEVEL:
-			elevel = el::Level::Unknown;
-			break;
-		default:
-			elevel = el::Level::Global;
-			break;
+static Level level_conversion(char *level) {
+
+	// global
+	if (!strcmp(level, EASYLOG_LEVEL_GLOBAL)) {
+		return Level::Global;
 	}
 
-	return elevel;
+	// trace
+	if (!strcmp(level, EASYLOG_LEVEL_TRACE)) {
+		return Level::Trace;
+	}
+
+	// debug
+	if (!strcmp(level, EASYLOG_LEVEL_DEBUG)) {
+		return Level::Debug;
+	}
+
+	// fatal
+	if (!strcmp(level, EASYLOG_LEVEL_FATAL)) {
+		return Level::Fatal;
+	}
+
+	// error
+	if (!strcmp(level, EASYLOG_LEVEL_ERROR)) {
+		return Level::Error;
+	}
+
+	// warning
+	if (!strcmp(level, EASYLOG_LEVEL_WARNING)) {
+		return Level::Warning;
+	}
+
+	// verbose
+	if (!strcmp(level, EASYLOG_LEVEL_VERBOSE)) {
+		return Level::Verbose;
+	}
+
+	// info
+	if (!strcmp(level, EASYLOG_LEVEL_INFO)) {
+		return Level::Info;
+	}
+
+	// unknown
+	if (!strcmp(level, EASYLOG_LEVEL_UNKNOWN)) {
+		return Level::Unknown;
+	}
+
+	return Level::Global;
 }
 
 PHP_METHOD(easylog, __construct) {
@@ -151,6 +173,8 @@ PHP_METHOD(easylog, __construct) {
 	}
 
 	if (logger_id != NULL) {
+		//修复配置文件没有要新建记录器
+		Loggers::getLogger(logger_id);
 		zend_update_property_string(easylog_ce, self, ZEND_STRL(EASYLOG_PROPERTY_LOGGER_ID), logger_id TSRMLS_DC);
 	}
 
@@ -159,46 +183,76 @@ PHP_METHOD(easylog, __construct) {
 
 PHP_METHOD(easylog, setLevel) {
 
-	long level = NULL;
-	el::Level elevel;
+	char *level = NULL;
+	size_t len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &level) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &level, &len) == FAILURE) {
 		return;
 	}
 
-	//转换级别
-	elevel = level_conversion(level);
+	if (level != NULL) {
+		// 设置级别门阀值，修改参数可以控制日志输出
+    	Loggers::setLoggingLevel(level_conversion(level));
+	}
+}
 
-	// 设置级别门阀值，修改参数可以控制日志输出
-    el::Loggers::setLoggingLevel(elevel);
+//设置单个日志的配置文件
+static void set_config(ConfigurationType type, INTERNAL_FUNCTION_PARAMETERS) {
+
+	zval *self = getThis();
+	zval *logger_id = NULL;
+	char *level = NULL, *config = NULL;
+	size_t level_len = 0, config_len = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &level, &level_len, &config, &config_len) == FAILURE) {
+		return;
+	}
+
+	//获取 loggerid
+	logger_id = zend_read_property(easylog_ce, self, ZEND_STRL(EASYLOG_PROPERTY_LOGGER_ID), 1, NULL TSRMLS_DC);
+
+	//设置单个日志的配置
+	Configurations c;
+    c.set(level_conversion(level), type, config);
+	Loggers::reconfigureLogger(Z_STRVAL_P(logger_id), c);
+
+	RETURN_TRUE;
+}
+
+PHP_METHOD(easylog, setFileName) {
+	set_config(ConfigurationType::Enabled, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(easylog, setFormat) {
+	set_config(ConfigurationType::Format, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, info) {
-	write_log(el::Level::Info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	write_log(Level::Info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, warning) {
-	write_log(el::Level::Warning, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	write_log(Level::Warning, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, error) {
-	write_log(el::Level::Error, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	write_log(Level::Error, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, debug) {
-	write_log(el::Level::Debug, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	write_log(Level::Debug, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, trace) {
-	write_log(el::Level::Trace, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	write_log(Level::Trace, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, fatal) {
-	write_log(el::Level::Fatal, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	write_log(Level::Fatal, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(easylog, verbose) {
-	write_log(el::Level::Verbose, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	write_log(Level::Verbose, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 static const zend_function_entry easylog_methods[] = {
@@ -210,7 +264,9 @@ static const zend_function_entry easylog_methods[] = {
 	PHP_ME(easylog, trace, arginfo_info, ZEND_ACC_PUBLIC)
 	PHP_ME(easylog, fatal, arginfo_info, ZEND_ACC_PUBLIC)
 	PHP_ME(easylog, verbose, arginfo_info, ZEND_ACC_PUBLIC)
-	PHP_ME(easylog, setLevel, arginfo_level, ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, setLevel, arginfo_level, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, setFormat, arginfo_config, ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, setFileName, arginfo_config, ZEND_ACC_PUBLIC)
 	PHP_FE_END	/* Must be the last line in easylog_functions[] */
 };
 
@@ -224,26 +280,31 @@ PHP_MINIT_FUNCTION(easylog)
 	easylog_ce = zend_register_internal_class(&ce TSRMLS_CC);
 
 	if (EASYLOG_G(config_file) != "") {
-		el::Loggers::configureFromGlobal(EASYLOG_G(config_file));
+		Loggers::configureFromGlobal(EASYLOG_G(config_file));
 	}
 
 	zend_declare_property_string(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_LOGGER_ID), EASYLOG_DEFAULT_LOGGER_ID, ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	//注册常量
-	zend_declare_class_constant_long(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_GLOBAL_LEVEL), EASYLOG_GLOBAL_LEVEL TSRMLS_CC);
-	zend_declare_class_constant_long(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_TRACE_LEVEL), EASYLOG_TRACE_LEVEL TSRMLS_CC);
-	zend_declare_class_constant_long(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_DEBUG_LEVEL), EASYLOG_DEBUG_LEVEL TSRMLS_CC);
-	zend_declare_class_constant_long(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_FATAL_LEVEL), EASYLOG_FATAL_LEVEL TSRMLS_CC);
-	zend_declare_class_constant_long(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_ERROR_LEVEL), EASYLOG_ERROR_LEVEL TSRMLS_CC);
-	zend_declare_class_constant_long(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_WARNING_LEVEL), EASYLOG_WARNING_LEVEL TSRMLS_CC);
-	zend_declare_class_constant_long(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_VERBOSE_LEVEL), EASYLOG_VERBOSE_LEVEL TSRMLS_CC);
-	zend_declare_class_constant_long(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_INFO_LEVEL), EASYLOG_INFO_LEVEL TSRMLS_CC);
-	zend_declare_class_constant_long(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_UNKNOWN_LEVEL), EASYLOG_UNKNOWN_LEVEL TSRMLS_CC);
+	zend_declare_class_constant_string(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_LEVEL_GLOBAL), EASYLOG_LEVEL_GLOBAL TSRMLS_CC);
+	zend_declare_class_constant_string(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_LEVEL_TRACE), EASYLOG_LEVEL_TRACE TSRMLS_CC);
+	zend_declare_class_constant_string(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_LEVEL_DEBUG), EASYLOG_LEVEL_DEBUG TSRMLS_CC);
+	zend_declare_class_constant_string(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_LEVEL_FATAL), EASYLOG_LEVEL_FATAL TSRMLS_CC);
+	zend_declare_class_constant_string(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_LEVEL_ERROR), EASYLOG_LEVEL_ERROR TSRMLS_CC);
+	zend_declare_class_constant_string(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_LEVEL_WARNING), EASYLOG_LEVEL_WARNING TSRMLS_CC);
+	zend_declare_class_constant_string(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_LEVEL_VERBOSE), EASYLOG_LEVEL_VERBOSE TSRMLS_CC);
+	zend_declare_class_constant_string(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_LEVEL_INFO), EASYLOG_LEVEL_INFO TSRMLS_CC);
+	zend_declare_class_constant_string(easylog_ce, ZEND_STRL(EASYLOG_PROPERTY_LEVEL_UNKNOWN), EASYLOG_LEVEL_UNKNOWN TSRMLS_CC);
 
 	// 防止Fatal级别日志中断程序
-    el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
+    Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
     // 选择划分级别的日志
-    el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
+    Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
+
+	if (EASYLOG_G(log_level)) {
+		// 设置级别门阀值，修改参数可以控制日志输出
+    	Loggers::setLoggingLevel(level_conversion(EASYLOG_G(log_level)));
+	}
 
 	return SUCCESS;
 }
@@ -258,6 +319,7 @@ PHP_MINFO_FUNCTION(easylog)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "easylog support", "enabled");
 	php_info_print_table_row(2, "Version", PHP_EASYLOG_VERSION);
+	php_info_print_table_row(2, "Log Level", "global trace debug fatal error warning verbose info unknown");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
