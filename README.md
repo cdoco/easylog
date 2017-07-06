@@ -16,6 +16,7 @@ extension=easylog.so
 
 [easylog]
 easylog.config_file = "/data/easylog.conf"
+
 // Level: global trace debug fatal error warning verbose info unknown
 easylog.log_level = "info"
 ```
