@@ -32,6 +32,7 @@ extern "C" {
 #include "easyloggingpp/easylogging++.h"
 
 using namespace el;
+using namespace std::placeholders;
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -162,6 +163,29 @@ static Level level_conversion(char *level) {
 	return Level::Global;
 }
 
+//设置单个日志的配置文件
+static void set_config(ConfigurationType type, INTERNAL_FUNCTION_PARAMETERS) {
+
+	zval *self = getThis();
+	zval *logger_id = NULL;
+	char *level = NULL, *config = NULL;
+	size_t level_len = 0, config_len = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &level, &level_len, &config, &config_len) == FAILURE) {
+		return;
+	}
+
+	//获取 loggerid
+	logger_id = zend_read_property(easylog_ce, self, ZEND_STRL(EASYLOG_PROPERTY_LOGGER_ID), 1, NULL TSRMLS_DC);
+
+	//设置单个日志的配置
+	Configurations c;
+    c.set(level_conversion(level), type, config);
+	Loggers::reconfigureLogger(Z_STRVAL_P(logger_id), c);
+
+	RETURN_TRUE;
+}
+
 PHP_METHOD(easylog, __construct) {
 
 	char *logger_id = NULL;
@@ -196,25 +220,22 @@ PHP_METHOD(easylog, setLevel) {
 	}
 }
 
-//设置单个日志的配置文件
-static void set_config(ConfigurationType type, INTERNAL_FUNCTION_PARAMETERS) {
+//获取自定义的格式 必须是个 function
+const char* getFormatValue(char* value) {  
+    return value;
+}
 
-	zval *self = getThis();
-	zval *logger_id = NULL;
-	char *level = NULL, *config = NULL;
-	size_t level_len = 0, config_len = NULL;
+PHP_METHOD(easylog, setCustomFormat) {
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &level, &level_len, &config, &config_len) == FAILURE) {
+	char *format = NULL, *value = NULL;
+	size_t format_len = 0, value_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &format, &format_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
-	//获取 loggerid
-	logger_id = zend_read_property(easylog_ce, self, ZEND_STRL(EASYLOG_PROPERTY_LOGGER_ID), 1, NULL TSRMLS_DC);
-
-	//设置单个日志的配置
-	Configurations c;
-    c.set(level_conversion(level), type, config);
-	Loggers::reconfigureLogger(Z_STRVAL_P(logger_id), c);
+	//注册自定义格式符
+	Helpers::installCustomFormatSpecifier(CustomFormatSpecifier(format, std::bind(getFormatValue, value)));
 
 	RETURN_TRUE;
 }
@@ -302,6 +323,7 @@ static const zend_function_entry easylog_methods[] = {
 	PHP_ME(easylog, setLogFlushThreshold, arginfo_config, ZEND_ACC_PUBLIC)
 	PHP_ME(easylog, setMillisecondsWidth, arginfo_config, ZEND_ACC_PUBLIC)
 	PHP_ME(easylog, setEnabled, arginfo_config, ZEND_ACC_PUBLIC)
+	PHP_ME(easylog, setCustomFormat, arginfo_config, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_FE_END	/* Must be the last line in easylog_functions[] */
 };
 
