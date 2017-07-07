@@ -32,7 +32,6 @@ extern "C" {
 #include "easyloggingpp/easylogging++.h"
 
 using namespace el;
-using namespace std::placeholders;
 
 INITIALIZE_EASYLOGGINGPP
 
