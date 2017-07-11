@@ -83,25 +83,25 @@ static void write_log(Level level, INTERNAL_FUNCTION_PARAMETERS) {
 	logger_id = zend_read_property(easylog_ce, self, ZEND_STRL(EASYLOG_PROPERTY_LOGGER_ID), 1, NULL TSRMLS_DC);
 
 	switch(level) {
-		case el::Level::Info:
+		case Level::Info:
 			CLOG(INFO, Z_STRVAL_P(logger_id)) << slog;
 			break;
-		case el::Level::Debug:
+		case Level::Debug:
 			CLOG(DEBUG, Z_STRVAL_P(logger_id)) << slog;
 			break;
-		case el::Level::Warning:
+		case Level::Warning:
 			CLOG(WARNING, Z_STRVAL_P(logger_id)) << slog;
 			break;
-		case el::Level::Error:
+		case Level::Error:
 			CLOG(ERROR, Z_STRVAL_P(logger_id)) << slog;
 			break;
-		case el::Level::Trace:
+		case Level::Trace:
 			CLOG(TRACE, Z_STRVAL_P(logger_id)) << slog;
 			break;
-		case el::Level::Fatal:
+		case Level::Fatal:
 			CLOG(FATAL, Z_STRVAL_P(logger_id)) << slog;
 			break;
-		case el::Level::Verbose:
+		case Level::Verbose:
 			VLOG(0) << slog;
 			break;
 		default:
