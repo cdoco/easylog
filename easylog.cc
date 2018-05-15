@@ -384,7 +384,7 @@ PHP_MINFO_FUNCTION(easylog)
 zend_module_entry easylog_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"easylog",
-	easylog_methods,
+	NULL,
 	PHP_MINIT(easylog),
 	PHP_MSHUTDOWN(easylog),
 	NULL,		/* Replace with NULL if there's nothing to do at request start */
